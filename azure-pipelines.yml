@@ -1,0 +1,53 @@
+# Node.js with React
+
+
+
+
+# Build a Node.js project that uses React.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+- master
+
+variables:
+  uiSource: 'src'
+  uiBuild: '$(uiSource)/build'
+
+steps:
+
+- task: SonarQubePrepare@4
+  inputs:
+    SonarQube: 'test-3'
+    scannerMode: 'CLI'
+    configMode: 'manual'
+    cliProjectKey: 'Practice_static_tests_Practice_static_tests'
+    cliSources: 'src'
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+
+
+- script: |
+    pushd $(uiSource)
+    npm install
+    npm i enzyme -D
+    npm i enzyme-adapter-react-16 -D
+    npm i redux-mock-store -D
+    npm run test
+    npm run build
+    popd
+  displayName: 'npm install and build'
+
+- task: SonarQubeAnalyze@4
+
+- task: SonarQubePublish@4
+  inputs:
+    pollingTimeoutSec: '300'
+
+
+pool:
+  name: Default
+  vmImage: ubuntu-latest
